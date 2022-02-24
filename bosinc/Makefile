@@ -14,19 +14,27 @@ CPP_FILES += BatteryInterface.cpp
 CPP_FILES += RPC.cpp
 CPP_FILES += AggregatorBattery.cpp
 CPP_FILES += BALSplitter.cpp
+CPP_FILES += iec61850.cpp
 
 C_FILES = include/wiringSerial.c
+INCLUDE_PATH = libiec61850/hal/inc/
 
+LIBIEC_HOME=libiec61850
+
+include $(LIBIEC_HOME)/make/target_system.mk
+include $(LIBIEC_HOME)/make/stack_includes.mk
+include $(LIBIEC_HOME)/make/common_targets.mk
 
 .PHONY: mac
 mac:
-	clang++ -std=c++17 $(PY_CFLAGS_EMBED) $(PY_LDFLAGS_EMBED) $(CPP_FILES) $(C_FILES) -g $(CURL_LDFLAGS)
+	clang++ -std=c++17 $(PY_CFLAGS_EMBED) $(PY_LDFLAGS_EMBED) $(CPP_FILES) $(C_FILES) -g $(CURL_LDFLAGS) -I $(INCLUDE_PATH)
 
 .PHONY: rpi
 rpi:
-	g++ -std=c++17 $(PY_CFLAGS) $(PY_LDFLAGS) $(CPP_FILES) $(C_FILES) -g $(CURL_LDFLAGS) -lpthread -fPIE
+	cd libiec61850; make
+	g++ -std=c++17 $(PY_CFLAGS) $(PY_LDFLAGS) $(CPP_FILES) $(C_FILES) -g $(CURL_LDFLAGS) -lpthread -fPIE -I $(INCLUDE_PATH) $(CFLAGS) $(LDFLAGS) $(INCLUDES) $(LIB_NAME) $(LDLIBS)
 	
 .PHONY: wsl
 wsl:
-	g++ -std=c++17 $(PY_CFLAGS_EMBED) $(CPP_FILES) $(C_FILES) -g $(CURL_LDFLAGS) -lpthread $(PY_LDFLAGS_EMBED) -fPIE
+	g++ -std=c++17 $(PY_CFLAGS_EMBED) $(CPP_FILES) $(C_FILES) -g $(CURL_LDFLAGS) -lpthread $(PY_LDFLAGS_EMBED) -fPIE -I $(INCLUDE_PATH)
 

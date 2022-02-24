@@ -6,6 +6,7 @@
 #include "SplittedBattery.hpp"
 #include "BOS.hpp"
 #include "sonnen.hpp"
+#include "iec61850.hpp"
 #include <iostream>
 
 void test_uart() {
@@ -769,7 +770,7 @@ void experiment2_dryrun(double watts = 4000.0) {
     // or change 10000 to something else 
     // current voltage is 235,000 +- 10,000 mV which is 235+-10 V
     bos.make_aggregator("agg1", 235000, 10000, {"slac", "home1"}, 1000);  // 235 +- 10
-    double volt = 235.0;
+    //double volt = 235.0;
 
     LOG() << "initital status of agg1: \n" << bos.get_status("agg1");
 
@@ -898,8 +899,13 @@ int test_network2(int port) {
     return 0;
 }
 
+void testIEC61850() {
+    IEC61850 battery("testB", std::chrono::milliseconds(1000), "testBattery", "ZBAT", "ZBTC", "ZINV");
+}
+
 
 int run() {
+    testIEC61850();
     // LOG();
     // test_battery_status();
     // test_python_binding();
@@ -930,29 +936,29 @@ int run() {
     }
 /////////////////////////////////////////////////////////// HERE //////////////////////////////////////////////////////////////
 
-    test_network(1234);
+    // test_network(1234);
     // test_network2(1234);
     return 0;
 }
 
 int main() {
-    Py_Initialize();
+    // Py_Initialize();
     // PyEval_InitThreads();
     // add the current path to the module search path!
-    PyObject *sys = PyImport_ImportModule("sys");
-    PyObject *path = PyObject_GetAttrString(sys, "path");
-    PyList_Append(path, PyUnicode_FromString("./python"));
-    Py_DECREF(path);
-    Py_DECREF(sys);
+    // PyObject *sys = PyImport_ImportModule("sys");
+    // PyObject *path = PyObject_GetAttrString(sys, "path");
+    // PyList_Append(path, PyUnicode_FromString("./python"));
+    // Py_DECREF(path);
+    // Py_DECREF(sys);
 
     
-    Py_BEGIN_ALLOW_THREADS
+    // Py_BEGIN_ALLOW_THREADS
     run();
-    Py_END_ALLOW_THREADS
+    // Py_END_ALLOW_THREADS
 
     
     
-    Py_FinalizeEx();
+    // Py_FinalizeEx();
     // ERROR() << "Just to test abnormal return" << ", sys=" << sys << ", path=" << path;
     // std::cout << std::endl;
     return 0;
