@@ -25,8 +25,8 @@ class IEC61850 : public PhysicalBattery {
     private:
         IedConnection con;
         IedClientError error;
-        const std::string LogicalDevice_Name;
-        const std::string ZBAT_Name, ZBTC_Name, ZINV_Name;
+        std::string LogicalDevice_Name;
+        std::string ZBAT_Name, ZBTC_Name, ZINV_Name;
         bool check_MmsValue(MmsValue* value);
         bool create_iec61850_client(std::string hostname, int tcpPort);
 };

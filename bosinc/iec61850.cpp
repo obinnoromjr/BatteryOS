@@ -6,19 +6,19 @@
 IEC61850::IEC61850(const std::string &name, std::chrono::milliseconds staleness, std::string LogicalDevice_Name, std::string ZBAT_Name, 
 std::string ZBTC_Name, std::string ZINV_Name)
 : PhysicalBattery(name, staleness) {
-    ZBAT_Name = ZBAT_Name;
-    ZBTC_Name = ZBTC_Name;
-    ZINV_Name = ZINV_Name;
-    LogicalDevice_Name = LogicalDevice_Name;
+    this -> ZBAT_Name = ZBAT_Name;
+    this -> ZBTC_Name = ZBTC_Name;
+    this -> ZINV_Name = ZINV_Name;
+    this -> LogicalDevice_Name = LogicalDevice_Name;
     create_iec61850_client("localhost", 102); // quit gracefully if this returns false
 }
 
 IEC61850::IEC61850(const std::string &name, std::chrono::milliseconds staleness, std::string LogicalDevice_Name, std::string ZBAT_Name, 
 std::string ZBTC_Name, std::string ZINV_Name, std::string hostname, int tcpPort) : PhysicalBattery(name, staleness) {
-    ZBAT_Name = ZBAT_Name;
-    ZBTC_Name = ZBTC_Name;
-    ZINV_Name = ZINV_Name;
-    LogicalDevice_Name = LogicalDevice_Name;
+    this -> ZBAT_Name = ZBAT_Name;
+    this -> ZBTC_Name = ZBTC_Name;
+    this -> ZINV_Name = ZINV_Name;
+    this -> LogicalDevice_Name = LogicalDevice_Name;
     create_iec61850_client(hostname, tcpPort); // quit gracefully if this returns false
 }
 
@@ -35,15 +35,15 @@ BatteryStatus IEC61850::refresh() {
     MmsValue* value;
     std::string voltage = LogicalDevice_Name + '/' + ZBAT_Name + ".Vol.mag.f";
     std::string current = LogicalDevice_Name + '/' + ZBAT_Name + ".Amp.mag.f";
-    std::string max_capacity = LogicalDevice_Name + '/' + ZBAT_Name + "AhrRtg.setMag.f";
-    std::string discharging_current = LogicalDevice_Name + '/' + ZBAT_Name + "MaxBatA.setMag.f";
+    std::string max_capacity = LogicalDevice_Name + '/' + ZBAT_Name + ".AhrRtg.setMag.f";
+    std::string discharging_current = LogicalDevice_Name + '/' + ZBAT_Name + ".MaxBatA.setMag.f";
 
     // Should I typecast the float to int64_t??
-    value = IedConnection_readObject(con, &error, voltage.c_str(), IEC61850_FC_SP);
-    if (check_MmsValue(value)) // Vol
+    value = IedConnection_readObject(con, &error, voltage.c_str(), IEC61850_FC_MX);
+    if (check_MmsValue(value))
         status.voltage_mV = (int64_t) MmsValue_toFloat(value);
     
-    value = IedConnection_readObject(con, &error, current.c_str(), IEC61850_FC_SP);
+    value = IedConnection_readObject(con, &error, current.c_str(), IEC61850_FC_MX);
     if (check_MmsValue(value)) // Amp 
         status.current_mA = (int64_t) MmsValue_toFloat(value);
 
@@ -64,7 +64,7 @@ BatteryStatus IEC61850::refresh() {
 
 uint32_t IEC61850::set_current(int64_t target_current_mA, bool is_greater_than_target, void *other_data) {
     // do I need to check staleness and refresh???
-    MmsValue* value;
+    // MmsValue* value;
     std::string charge_mode = LogicalDevice_Name + '/' + ZBTC_Name + ".BatChaMod.setVal";
     std::string current_limit = LogicalDevice_Name + '/' + ZINV_Name + ".InALim.setMag.f";
     std::string recharge_rate = LogicalDevice_Name + '/' + ZBTC_Name + ".ReChaRte.setMag.i";

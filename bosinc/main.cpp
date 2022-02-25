@@ -875,6 +875,7 @@ int test_network(int port) {
     LOG() << slac_status;
     
     bos.simple_remote_connection_server(port);
+    return 0;
 }
 
 int test_network2(int port) {
@@ -900,7 +901,8 @@ int test_network2(int port) {
 }
 
 void testIEC61850() {
-    IEC61850 battery("testB", std::chrono::milliseconds(1000), "testBattery", "ZBAT", "ZBTC", "ZINV");
+    IEC61850 battery("testB", std::chrono::milliseconds(1000), "testmodelBattery", "ZBAT", "ZBTC", "ZINV");
+    battery.manual_refresh();
 }
 
 
