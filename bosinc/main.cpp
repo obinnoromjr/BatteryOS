@@ -903,6 +903,7 @@ int test_network2(int port) {
 void testIEC61850() {
     IEC61850 battery("testB", std::chrono::milliseconds(1000), "testmodelBattery", "ZBAT", "ZBTC", "ZINV");
     battery.manual_refresh();
+    battery.set_current(-5, true, NULL);
 }
 
 

@@ -57,42 +57,42 @@ BatteryStatus IEC61850::refresh() {
 
     status.timestamp = get_system_time_c();
 
-    // status.max_charging_current_mA
+    status.max_charging_current_mA = 10;
     // status.capacity_mAh
     return status;
 }
 
 uint32_t IEC61850::set_current(int64_t target_current_mA, bool is_greater_than_target, void *other_data) {
     // do I need to check staleness and refresh???
-    // MmsValue* value;
+    MmsValue* value;
     std::string charge_mode = LogicalDevice_Name + '/' + ZBTC_Name + ".BatChaMod.setVal";
-    std::string current_limit = LogicalDevice_Name + '/' + ZINV_Name + ".InALim.setMag.f";
+    std::string current_limit = LogicalDevice_Name + '/' + ZINV_Name + ".InALim.setMag.i";
     std::string recharge_rate = LogicalDevice_Name + '/' + ZBTC_Name + ".ReChaRte.setMag.i";
 
-    if ((target_current_mA < 0) && (-target_current_mA) > this -> status.max_charging_current_mA) {
+    if ((target_current_mA < 0) && (-target_current_mA) < this -> status.max_charging_current_mA) {
         int current = (-target_current_mA);
 
         IedConnection_writeObject(con, &error, recharge_rate.c_str(), IEC61850_FC_SP, MmsValue_newIntegerFromInt64(current));
         if (error != IED_ERROR_OK)
-            std::cout << "Failed to write recharge rate: " + recharge_rate + " to server" << std::endl;
+            LOG() << "Failed to write recharge rate: " + recharge_rate + " to server";;
 
         // switches battery to Operatinal Mode (turns it on??)
         IedConnection_writeObject(con, &error, charge_mode.c_str(), IEC61850_FC_SP, MmsValue_newIntegerFromInt64(2)); // Operational Mode page 84 of ZBAT file 
         if (error != IED_ERROR_OK)
-            std::cout << "Failed to write charge mode to server" << std::endl;
+            LOG() << "Failed to write charge mode to server";
         
         return 0;
-    } else if (target_current_mA > 0 && target_current_mA > this -> status.max_discharging_current_mA) {
+    } else if (target_current_mA > 0 && target_current_mA < this -> status.max_discharging_current_mA) {
         // Turn Battery Charger Off 
-        IedConnection_writeObject(con, &error, recharge_rate.c_str(), IEC61850_FC_SP, MmsValue_newIntegerFromInt64(1));
+        IedConnection_writeObject(con, &error, charge_mode.c_str(), IEC61850_FC_SP, MmsValue_newIntegerFromInt64(1));
         if (error != IED_ERROR_OK) // How do you turn the inverter on/off?
-            std::cout << "Failed to write charge mode to server" << std::endl;
+            LOG() << "Failed to write charge mode to server";
         
         // Sets current limit for inverter
         IedConnection_writeObject(con, &error, current_limit.c_str(), IEC61850_FC_SP, MmsValue_newIntegerFromInt64(target_current_mA));
         if (error != IED_ERROR_OK)
-            std::cout << "Failed to write current limit: " + current_limit + " to server" << std::endl;
-        
+            LOG() << "Failed to write current limit: " + current_limit + " to server"; 
+
         return 0;
     }
     return 1;
